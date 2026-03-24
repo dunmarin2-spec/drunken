@@ -3,39 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🍺 음주 좀비 판독기</title>
+    <title>🍺 사이버 좀비 판독기</title>
     <style>
-        :root { --neon: #39ff14; --dark: #000000; --red: #ff4757; }
-        body { background: var(--dark); color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        :root { --neon-green: #39ff14; --neon-red: #ff003c; --dark: #000000; --gold: #ffd700; }
         
-        .container { text-align: center; width: 90%; max-width: 400px; }
-        h1 { color: var(--neon); font-size: 1.5rem; margin-bottom: 5px; text-shadow: 0 0 10px var(--neon); }
-        .desc { font-size: 0.8rem; color: #888; margin-bottom: 30px; }
+        @font-face { font-family: 'DungGeunMo'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff') format('woff'); font-weight: normal; font-style: normal; }
+        
+        body { 
+            /* 🖼️ 배경 이미지: 음산한 네온 술집 (형님이 원하시는 이미지로 교체 가능) */
+            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), 
+                        url('https://images.unsplash.com/photo-1549497538-303791108f94?q=80&w=600') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff; font-family: 'DungGeunMo', sans-serif; margin: 0; overflow: hidden; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-transform: uppercase;
+        }
+        
+        .container { text-align: center; width: 90%; max-width: 450px; background: rgba(0,0,0,0.7); padding: 30px; border-radius: 20px; border: 4px double var(--neon-green); box-shadow: 0 0 30px rgba(57, 255, 20, 0.4); }
+        
+        h1 { font-size: 2rem; color: #fff; margin-bottom: 5px; text-shadow: 0 0 10px var(--neon-green), 0 0 20px var(--neon-green); animation: title-flicker 2s infinite; }
+        .desc { font-size: 0.9rem; color: #aaa; margin-bottom: 25px; }
 
         /* 게임 보드 */
-        #board { width: 300px; height: 300px; border: 4px solid #333; border-radius: 50%; position: relative; margin: 0 auto; background: radial-gradient(#111, #000); overflow: hidden; }
-        #target-area { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; border: 2px dashed var(--neon); border-radius: 50%; }
-        #ball { position: absolute; top: 50%; left: 50%; width: 30px; height: 30px; background: var(--neon); border-radius: 50%; transform: translate(-50%, -50%); transition: 0.05s linear; box-shadow: 0 0 15px var(--neon); }
-
-        /* 타이머 & 결과 */
-        #timer { font-size: 2.5rem; font-weight: 900; margin: 20px 0; color: #fff; }
-        .btn-start { width: 100%; padding: 18px; background: var(--neon); color: #000; border: none; border-radius: 12px; font-size: 1.2rem; font-weight: bold; cursor: pointer; }
+        #board { width: 300px; height: 300px; border: 6px solid #222; border-radius: 50%; position: relative; margin: 0 auto; background: rgba(17,17,17,0.8); overflow: hidden; box-shadow: inset 0 0 20px #000; }
         
-        #result-popup { display: none; margin-top: 20px; animation: fadeInUp 0.5s; }
-        .msg { font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; }
+        /* 중앙 타겟 영역 이미지 */
+        #target-area { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70px; height: 70px; border-radius: 50%; background: url('https://raw.githubusercontent.com/yannick-code/gif-lib/master/target_pulse.gif') center/cover; opacity: 0.6; }
+        
+        /* 🧪 구슬 이미지: 독극물 앰플 (이걸 이미지로 변경) */
+        #ball { position: absolute; top: 50%; left: 50%; width: 40px; height: 40px; background: url('https://i.ibb.co/3sX84Xm/chemical-vial.png') center/cover; transform: translate(-50%, -50%); transition: 0.04s linear; filter: drop-shadow(0 0 10px var(--neon-green)); z-index: 10; }
+
+        /* 타이머 & 버튼 */
+        #timer { font-size: 3rem; margin: 15px 0; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.7); }
+        .btn-start { width: 100%; padding: 18px; background: #222; color: var(--neon-green); border: 3px solid var(--neon-green); border-radius: 10px; font-size: 1.4rem; font-family: 'DungGeunMo', sans-serif; cursor: pointer; transition: 0.1s; box-shadow: 0 0 15px rgba(57, 255, 20, 0.5); }
+        .btn-start:active { background: var(--neon-green); color: #000; box-shadow: 0 0 25px var(--neon-green); }
+        .btn-start:disabled { border-color: #444; color: #444; cursor: not-allowed; }
+        
+        /* 결과 팝업 */
+        #result-popup { display: none; margin-top: 20px; animation: scaleIn 0.3s forwards; text-align: center; }
+        
+        /* 🖼️ 결과 이미지 (합격/탈락) */
+        #result-img { width: 80px; height: 80px; margin-bottom: 10px; filter: drop-shadow(0 0 10px #fff); }
+        .msg { font-size: 1.3rem; font-weight: bold; margin-bottom: 15px; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
         
         /* 후원 섹션 */
-        .bank-box { background: #1a1a1a; padding: 15px; border-radius: 10px; font-size: 0.85rem; border: 1px solid #333; }
-        .copy-btn { color: var(--neon); cursor: pointer; text-decoration: underline; font-weight: bold; }
+        .bank-box { background: #111; padding: 15px; border-radius: 10px; font-size: 0.85rem; border: 1px solid #333; position: relative; }
+        
+        /* 🖼️ 후원 황금 아이콘 이미지 */
+        .donate-icon { position: absolute; top: -15px; left: -15px; width: 40px; height: 40px; background: url('https://i.ibb.co/wMs991h/gold-coin.png') center/cover; }
+        
+        .copy-btn { color: var(--gold); cursor: pointer; font-weight: bold; text-shadow: 0 0 5px rgba(255,215,0,0.5); font-size: 1rem; }
 
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        /* 애니메이션 */
+        @keyframes title-flicker { 0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; } 20%, 22%, 24%, 55% { opacity: 0.5; } }
+        @keyframes scaleIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h1>🍺 좀비 판독기</h1>
-        <p class="desc">구슬을 10초간 중앙 점선 안에 가두십시오.</p>
+        <p class="desc">10초간 시약을 타겟 중앙에 가두십시오.</p>
 
         <div id="board">
             <div id="target-area"></div>
@@ -43,12 +70,13 @@
         </div>
 
         <div id="timer">10.0s</div>
-        <button id="start-btn" class="btn-start" onclick="startGame()">테스트 시작!</button>
+        <button id="start-btn" class="btn-start" onclick="startGame()">테스트 가즈아!</button>
 
         <div id="result-popup">
+            <img id="result-img" src="" alt="결과 이미지">
             <div id="result-msg" class="msg"></div>
             <div class="bank-box">
-                탈락자는 대리비 입금 가즈아!<br>
+                <div class="donate-icon"></div> <p style="margin: 0 0 10px;">좀비로 판명된 하남자는 대리비를 입금하시오.</p>
                 <span class="copy-btn" onclick="copyAccount()">케이뱅크 100-210-317446</span>
             </div>
         </div>
@@ -60,13 +88,17 @@
         let startBtn = document.getElementById('start-btn');
         let resultPopup = document.getElementById('result-popup');
         let resultMsg = document.getElementById('result-msg');
+        let resultImg = document.getElementById('result-img');
 
-        let x = 0, y = 0; // 구슬 위치
+        // 🖼️ 결과 이미지 URL 세팅
+        const SUCCESS_IMG = "https://i.ibb.co/v44m5Yg/success-stamp.png"; // 인간 인증 도장
+        const FAIL_IMG = "https://i.ibb.co/M9B7X25/zombie-icon.png"; // 좀비 아이콘
+
+        let x = 0, y = 0; 
         let timeLeft = 10;
         let isPlaying = false;
         let gameInterval;
 
-        // 센서 권한 요청 (iOS 등 대응)
         function startGame() {
             if (typeof DeviceOrientationEvent.requestPermission === 'function') {
                 DeviceOrientationEvent.requestPermission()
@@ -88,6 +120,7 @@
             x = 0; y = 0;
             startBtn.disabled = true;
             resultPopup.style.display = 'none';
+            ball.style.background = "url('https://i.ibb.co/3sX84Xm/chemical-vial.png') center/cover"; // 시약 이미지
             
             window.addEventListener('deviceorientation', handleOrientation);
             
@@ -95,9 +128,8 @@
                 timeLeft -= 0.1;
                 timerDisplay.innerText = timeLeft.toFixed(1) + "s";
 
-                // 구슬이 중앙에서 너무 멀어지면 탈락 (60px 범위)
                 let distance = Math.sqrt(x*x + y*y);
-                if (distance > 30) { 
+                if (distance > 35) { // 감도 빡세게 (시약이 탈출하면 탈락)
                     endGame(false);
                 }
 
@@ -108,15 +140,14 @@
         }
 
         function handleOrientation(event) {
-            // 기울기 데이터를 구슬 좌표로 변환
-            // beta: 앞뒤(-180~180), gamma: 좌우(-90~90)
+            // 자이로 센서 데이터 받기
             let moveX = event.gamma * 2; 
             let moveY = event.beta * 2;
 
             x = moveX;
             y = moveY;
 
-            // 구슬 이동 제한 (보드 안에서만)
+            // 시약 위치 이동 (부드럽게 이미지 업데이트)
             ball.style.left = `calc(50% + ${x}px)`;
             ball.style.top = `calc(50% + ${y}px)`;
         }
@@ -130,11 +161,15 @@
 
             resultPopup.style.display = 'block';
             if (isSuccess) {
-                resultMsg.innerText = "✅ 합격! 당신은 인간입니다.";
+                resultImg.src = SUCCESS_IMG;
+                resultMsg.innerText = "[인간 인증] 합격!";
                 resultMsg.style.color = "#39ff14";
             } else {
-                resultMsg.innerText = "🚨 탈락! 당신은 음주 좀비입니다.";
-                resultMsg.style.color = "#ff4757";
+                resultImg.src = FAIL_IMG;
+                resultMsg.innerText = "[음주 좀비] 즉시 처단!";
+                resultMsg.style.color = "#ff003c";
+                // 탈락 시 시약 이미지를 깨진 걸로 교체 (형님이 이미지 준비되면)
+                ball.style.background = "url('https://i.ibb.co/v44m5Yg/success-stamp.png') center/cover"; // 폰트 도장으로 대동강
                 if (navigator.vibrate) navigator.vibrate(500);
             }
         }
@@ -142,7 +177,7 @@
         function copyAccount() {
             const acc = "케이뱅크 100-210-317446";
             navigator.clipboard.writeText(acc);
-            alert("계좌번호 복사 완료! 대리비 입금 부탁드립니다.\n\n" + acc);
+            alert("계좌번호 복사 완료! 형님, 대리비 입금 가즈아!\n\n" + acc);
         }
     </script>
 </body>
