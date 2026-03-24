@@ -3,63 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🐉 4성구 서바이벌: 좀비 판독기</title>
+    <title>🐉 찐 4성구 서바이벌: 좀비 폭격기</title>
     <style>
-        :root { --matrix-green: #39ff14; --neon-red: #ff003c; --gold: #ffd700; }
+        :root { --matrix-green: #39ff14; --neon-red: #ff003c; --gold: #ffd700; --dark: #000; }
         @font-face { font-family: 'DungGeunMo'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff') format('woff'); font-weight: normal; font-style: normal; }
         
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'DungGeunMo', sans-serif; background: #000; }
         
-        /* 🖼️ 배경: 형님이 만드신 이미지를 bg.jpg로 연결 (없으면 까만색) */
+        /* 🖼️ 배경: 형님이 만드신 bg.jpg */
         .bg-image { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: url('bg.jpg') no-repeat center center; 
-            background-size: cover; 
-            z-index: 0; filter: brightness(0.6); transition: 0.2s;
+            background-size: cover; z-index: 0; 
+            filter: grayscale(100%) brightness(0.4); 
+            transition: 0.3s;
         }
-        /* 좀비 판정 시 배경 붉게 깜빡임 */
-        .bg-image.zombie { animation: bloody-flicker 0.2s infinite; }
+        .bg-image.active { filter: grayscale(0%) brightness(1); animation: bloody-flicker 0.1s infinite; }
 
         .game-wrapper { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
         
-        /* 🌑 좁아진 블랙홀 (지름 140px) */
+        /* 🌑 좁은 블랙홀 (지름 140px) */
         #board { 
             width: 140px; height: 140px; position: relative; 
             background: #000000; 
             border-radius: 50%; 
             border: 6px solid var(--matrix-green); 
             box-shadow: 0 0 30px rgba(57,255,20,0.8), inset 0 0 40px rgba(0,0,0,1); 
+            overflow: hidden; 
         }
         
-        /* 🟠 코딩으로 직접 깎아 만든 절대 안 깨지는 4성구 (지름 80px) */
+        /* 🟠 디테일 깎은 찐 4성구 (지름 80px) */
         #ball { 
             position: absolute; top: 50%; left: 50%; width: 80px; height: 80px; 
             border-radius: 50%; transform: translate(-50%, -50%); transition: 0.05s linear;
             background: radial-gradient(circle at 30% 30%, #ffdf00, #ff8c00, #cc3300);
             box-shadow: inset -5px -5px 15px rgba(0,0,0,0.6), 0 0 15px rgba(255,140,0,0.8);
-            display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
-            padding: 15px; box-sizing: border-box; z-index: 20;
+            z-index: 20;
         }
-        /* 4성구의 별 4개 */
-        .star { color: #d32f2f; font-size: 20px; line-height: 0.8; text-shadow: 1px 1px 0 rgba(255,255,255,0.4); }
+
+        /* ⭐ 4성구 별 위치 완벽 조정 (주사위 4 눈금 모양) */
+        .star { position: absolute; color: #d32f2f; font-size: 22px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); transform: translate(-50%, -50%); }
+        .star-1 { top: 32%; left: 32%; }
+        .star-2 { top: 32%; left: 68%; }
+        .star-3 { top: 68%; left: 32%; }
+        .star-4 { top: 68%; left: 68%; }
 
         .ui-box { margin-top: 50px; text-align: center; }
         #timer { font-size: 4rem; color: #fff; text-shadow: 0 0 15px var(--matrix-green); margin: 0 0 15px 0; }
-        .btn-start { padding: 15px 40px; background: rgba(0,0,0,0.8); color: var(--matrix-green); border: 3px solid var(--matrix-green); border-radius: 12px; font-size: 1.5rem; font-family: 'DungGeunMo'; cursor: pointer; box-shadow: 0 0 15px rgba(57,255,20,0.5); }
-        .btn-start:active { transform: scale(0.95); background: var(--matrix-green); color: #000; }
+        .btn-start { padding: 20px 50px; background: rgba(0,0,0,0.8); color: var(--matrix-green); border: 3px solid var(--matrix-green); border-radius: 15px; font-size: 1.5rem; font-family: 'DungGeunMo'; cursor: pointer; transition: 0.1s; box-shadow: 0 0 15px rgba(57,255,20,0.5); }
+        .btn-start:active { transform: scale(0.95); background: var(--matrix-green); color: #000; box-shadow: 0 0 25px var(--matrix-green); }
         
         /* 🚨 대문짝만한 결과 팝업 */
         #result-popup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; text-align: center; z-index: 100; animation: smash 0.2s forwards; }
+        .huge-warning { font-size: 5rem; color: var(--neon-red); font-weight: 900; text-shadow: 0 0 20px var(--neon-red), 0 0 50px #000; margin-bottom: 20px; line-height: 1.2; word-break: keep-all; }
         
-        /* 형님이 원하신 대문짝만한 글씨 */
-        .huge-warning { font-size: 4.5rem; color: var(--neon-red); font-weight: 900; text-shadow: 0 0 20px var(--neon-red), 0 0 50px #000; margin-bottom: 20px; line-height: 1.2; word-break: keep-all; }
-        .success-msg { font-size: 4rem; color: var(--matrix-green); font-weight: 900; text-shadow: 0 0 20px var(--matrix-green), 0 0 50px #000; margin-bottom: 20px; }
-        
-        .bank-box { background: rgba(0,0,0,0.9); padding: 20px; border-radius: 15px; border: 2px solid #444; display: inline-block; }
+        .bank-box { background: rgba(0,0,0,0.95); padding: 25px; border-radius: 15px; border: 2px solid #444; display: inline-block; box-shadow: 0 0 30px rgba(255,0,0,0.5); }
         .copy-btn { color: var(--gold); cursor: pointer; font-size: 1.3rem; text-decoration: underline; text-shadow: 0 0 5px var(--gold); }
 
-        @keyframes bloody-flicker { 0% { filter: hue-rotate(0deg) contrast(150%) brightness(0.5) sepia(1) hue-rotate(-50deg) saturate(5); } 100% { filter: hue-rotate(10deg) contrast(180%) brightness(0.8) sepia(1) hue-rotate(-50deg) saturate(5); } }
         @keyframes smash { 0% { transform: translate(-50%, -50%) scale(3); opacity: 0; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+        @keyframes bloody-flicker { 0% { filter: hue-rotate(0deg) contrast(150%) brightness(0.8) sepia(1) hue-rotate(-50deg) saturate(5); } 100% { filter: hue-rotate(10deg) contrast(200%) brightness(1.2) sepia(1) hue-rotate(-50deg) saturate(5); } }
     </style>
 </head>
 <body>
@@ -69,8 +71,10 @@
     <div class="game-wrapper">
         <div id="board">
             <div id="ball">
-                <span class="star">★</span><span class="star">★</span>
-                <span class="star">★</span><span class="star">★</span>
+                <span class="star star-1">★</span>
+                <span class="star star-2">★</span>
+                <span class="star star-3">★</span>
+                <span class="star star-4">★</span>
             </div>
         </div>
         
@@ -81,9 +85,9 @@
     </div>
 
     <div id="result-popup">
-        <div id="result-text"></div>
+        <div id="result-text" class="huge-warning">경고 :<br>좀비 출현!</div>
         <div class="bank-box">
-            <p style="margin:0 0 10px; font-size:1rem; color:#fff;">좀비는 얌전히 대리비를 입금하라.</p>
+            <p style="margin:0 0 10px; font-size:1rem; color:#fff;">좀비 하남자는 대리비를 입금하시오.</p>
             <span class="copy-btn" onclick="copyAccount()">케이뱅크 100-210-317446</span>
         </div>
     </div>
@@ -94,7 +98,6 @@
         let startBtn = document.getElementById('start-btn');
         let bg = document.getElementById('bg');
         let popup = document.getElementById('result-popup');
-        let resText = document.getElementById('result-text');
 
         let x = 0, y = 0, timeLeft = 10, isPlaying = false, gameInterval;
 
@@ -111,7 +114,7 @@
             isPlaying = true; timeLeft = 10; x = 0; y = 0;
             startBtn.disabled = true;
             popup.style.display = 'none';
-            bg.classList.remove('zombie');
+            bg.classList.remove('active'); 
             
             ball.style.left = `50%`;
             ball.style.top = `50%`;
@@ -122,7 +125,7 @@
                 timeLeft -= 0.1;
                 timerDisplay.innerText = timeLeft.toFixed(1) + "S";
                 
-                // 💡 난이도 극악: 블랙홀 반지름 70px, 4성구 반지름 40px -> 30px만 벗어나도 아웃!
+                // 블랙홀(반지름 70px) - 구슬(반지름 40px) = 30px 제한
                 let dist = Math.sqrt(x*x + y*y);
                 if (dist > 30) { 
                     endGame(false); 
@@ -135,8 +138,8 @@
         }
 
         function handleOrientation(e) {
-            x = (e.gamma || 0) * 2; 
-            y = (e.beta || 0) * 2;
+            x = (e.gamma || 0) * 2.5; 
+            y = (e.beta || 0) * 2.5;
             
             ball.style.left = `calc(50% + ${x}px)`;
             ball.style.top = `calc(50% + ${y}px)`;
@@ -146,23 +149,23 @@
             isPlaying = false; clearInterval(gameInterval);
             window.removeEventListener('deviceorientation', handleOrientation);
             startBtn.disabled = false;
-            popup.style.display = 'block';
             
             if (win) {
-                resText.className = "success-msg";
-                resText.innerHTML = "합격!<br>인간 생존";
+                timerDisplay.innerText = "😎 생존!";
+                timerDisplay.style.color = "#39ff14";
             } else {
-                resText.className = "huge-warning";
-                resText.innerHTML = "경고 :<br>좀비 출현!";
-                bg.classList.add('zombie'); // 배경 피바다로 변함
-                if (navigator.vibrate) navigator.vibrate([1000]); // 탈락 시 길게 진동
+                timerDisplay.innerText = "🧟‍♂️ 탈락!";
+                timerDisplay.style.color = "#ff003c";
+                popup.style.display = 'block'; 
+                bg.classList.add('active'); 
+                if (navigator.vibrate) navigator.vibrate([1000]); 
             }
         }
 
         function copyAccount() {
             const acc = "케이뱅크 100-210-317446";
             navigator.clipboard.writeText(acc);
-            alert("계좌번호 복사 완료!\n\n" + acc);
+            alert("계좌번호 복사 완료! 형님, 입금 가즈아!\n\n" + acc);
         }
     </script>
 </body>
