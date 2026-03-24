@@ -3,54 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🎰 와이프 아웃! 좀비 판독기</title>
+    <title>🤪 애니메 좀비 콜라주</title>
     <style>
-        :root { --p-purple: #9c27b0; --p-orange: #ff9800; --p-green: #39ff14; --p-red: #ff003c; --p-gold: #ffd700; --dark: #000; }
+        :root { --matrix-green: #39ff14; --neon-red: #ff003c; --gold: #ffd700; }
         
-        /* DMD (핀볼 전광판) 폰트 */
-        @font-face { font-family: 'DMDDot'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/Dotum.woff') format('woff'); font-weight: normal; font-style: normal; }
+        @font-face { font-family: 'DungGeunMo'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff') format('woff'); font-weight: normal; font-style: normal; }
         
-        body { 
-            /* 🖼️ 배경 이미지: 핀볼 회로판 (형님이 원하시는 이미지로 교체 가능) */
-            background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), 
-                        url('https://i.ibb.co/68fK97V/pinball-circuit.png') no-repeat center center fixed;
-            background-size: cover;
-            color: #fff; font-family: 'Courier New', monospace; margin: 0; overflow: hidden; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-transform: uppercase;
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'DungGeunMo', sans-serif; cursor: pointer; text-transform: uppercase; }
+        
+        /* 🖼️ [핵심] 배경 이미지: 각종 애니메이션 캐릭터 콜라주 (형님이 원하시는 이미지 URL로 교체 가능) */
+        .anime-collage { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://i.ibb.co/68fK97V/pinball-circuit.png') no-repeat center center fixed; /* 임시 콜라주 이미지 */
+            background-size: cover; z-index: -1; filter: grayscale(100%); /* 처음엔 흑백으로 밑밥 */
+            transition: 0.5s;
         }
-        
-        .pinball-machine { 
-            text-align: center; width: 90%; max-width: 450px; background: rgba(17,17,17,0.95); padding: 30px; border-radius: 20px; 
-            border: 6px solid #444; box-shadow: 0 10px 40px rgba(0,0,0,0.8); position: relative;
-        }
-        
-        /* 핀볼 타이틀 이미지 */
-        .title-image { width: 100%; max-width: 300px; margin-bottom: 5px; }
-        .sub-title { color: #aaa; margin-bottom: 25px; font-size: 0.8rem; }
+        .anime-collage.active { filter: grayscale(0%); animation: animate-bg 10s linear infinite; } /* 귀신 뜨면 컬러+애니메이션 */
 
-        /* 게임 보드: 기계식 느낌 */
-        #board { width: 300px; height: 300px; border: 4px solid #333; border-radius: 20px; position: relative; margin: 0 auto; 
-                 background: url('https://i.ibb.co/YXZN9T3/ski-hill.png') center/cover; overflow: hidden; box-shadow: inset 0 0 20px #000; }
+        /* 게임 보드: 맨 처음의 블랙홀 원 */
+        .game-container { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
-        /* 핀볼 레일 이미지 */
-        #rail { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: url('https://i.ibb.co/3sX84Xm/chemical-vial.png') center/cover; opacity: 0.4; }
+        #board { width: 320px; height: 320px; position: relative; margin: 0 auto; 
+                 /* 🌑 칠흑 같은 검은색 블랙홀 원 */
+                 background: #000; border-radius: 50%; box-shadow: 0 0 40px #000, inset 0 0 20px #111; overflow: hidden; border: 4px solid #333; }
         
-        /* 🧪 구슬 이미지: 독극물 앰플 (이걸 이미지로 변경) */
-        #ball { position: absolute; top: 50%; left: 50%; width: 45px; height: 45px; background: url('https://i.ibb.co/3sX84Xm/chemical-vial.png') center/cover; transform: translate(-50%, -50%); transition: 0.04s linear; filter: drop-shadow(0 0 15px var(--p-green)); z-index: 10; }
+        /* 중앙 타겟 영역 이미지 (블랙홀 안의 미세한 파동) */
+        #target-area { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70px; height: 70px; border-radius: 50%; background: url('https://raw.githubusercontent.com/yannick-code/gif-lib/master/target_pulse.gif') center/cover; opacity: 0.3; }
+        
+        /* 🧪 구슬 이미지: 독극물 앰플 */
+        #ball { position: absolute; top: 50%; left: 50%; width: 45px; height: 45px; background: url('https://i.ibb.co/3sX84Xm/chemical-vial.png') center/cover; transform: translate(-50%, -50%); transition: 0.04s linear; filter: drop-shadow(0 0 15px var(--matrix-green)); z-index: 10; }
 
-        /* DMD 전광판 */
-        .dmd-display { background: #000; padding: 10px; border: 3px solid #333; border-radius: 10px; margin: 20px 0; font-family: 'DMDDot', monospace; }
-        #timer { font-size: 2.5rem; color: var(--p-orange); text-shadow: 0 0 10px var(--p-orange); }
-        .score-info { color: #888; font-size: 0.8rem; margin-top: 5px; }
-
-        /* 핀볼 버튼 */
-        .btn-launch { width: 100%; padding: 20px; background: #222; color: var(--p-green); border: 3px solid var(--p-green); border-radius: 15px; 
-                     font-size: 1.4rem; font-family: 'Courier New', monospace; font-weight: 900; cursor: pointer; transition: 0.1s; box-shadow: 0 0 15px rgba(57, 255, 20, 0.5); }
-        .btn-launch:active { background: var(--p-green); color: #000; box-shadow: 0 0 25px var(--p-green); }
-        .btn-launch:disabled { border-color: #444; color: #444; cursor: not-allowed; }
+        /* 타이머 & 버튼 */
+        #timer { font-size: 2.8rem; margin: 20px 0; color: #fff; text-shadow: 0 0 10px rgba(0,0,0,0.7); }
+        .btn-start { padding: 20px 40px; background: rgba(0,0,0,0.8); color: var(--matrix-green); border: 3px solid var(--matrix-green); border-radius: 15px; font-size: 1.3rem; font-family: 'DungGeunMo', sans-serif; cursor: pointer; transition: 0.1s; box-shadow: 0 0 15px rgba(57, 255, 20, 0.5); }
+        .btn-start:active { background: var(--matrix-green); color: #000; box-shadow: 0 0 25px var(--matrix-green); }
         
         /* 결과 팝업 */
-        #result-popup { display: none; margin-top: 25px; animation: scaleIn 0.3s forwards; text-align: center; }
+        #result-popup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 400px; background: rgba(0,0,0,0.95); padding: 30px; border-radius: 20px; border: 4px solid var(--neon-red); text-align: center; animation: scaleIn 0.3s forwards; z-index: 100; }
         
         /* 🖼️ 결과 이미지 (합격/탈락) */
         #result-img { width: 100px; height: 100px; margin-bottom: 15px; filter: drop-shadow(0 0 10px #fff); }
@@ -58,50 +47,44 @@
         
         /* 후원 섹션 */
         .bank-box { background: #111; padding: 15px; border-radius: 10px; font-size: 0.85rem; border: 1px solid #333; position: relative; }
-        
-        /* 🖼️ 후원 황금 아이콘 이미지 */
-        .donate-icon { position: absolute; top: -20px; left: -20px; width: 45px; height: 45px; background: url('https://i.ibb.co/wMs991h/gold-coin.png') center/cover; }
-        
-        .copy-btn { color: var(--p-gold); cursor: pointer; font-weight: bold; text-shadow: 0 0 5px rgba(255,215,0,0.5); font-size: 1rem; }
+        .copy-btn { color: var(--gold); cursor: pointer; font-weight: bold; text-shadow: 0 0 5px rgba(255,215,0,0.5); font-size: 1rem; }
 
         /* 애니메이션 */
-        @keyframes scaleIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes scaleIn { from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+        @keyframes animate-bg { 0% { background-position: 0 0; } 100% { background-position: 100% 100%; } } /* 배경 이미지 움직이게 */
     </style>
 </head>
 <body>
 
-    <div class="pinball-machine">
-        <img class="title-image" src="https://raw.githubusercontent.com/yannick-code/gif-lib/master/target_pulse.gif" alt="핀볼 타이틀">
-        <p class="sub-title">10초간 시약을 설산 중앙에 가두십시오.</p>
+    <div id="anime-bg" class="anime-collage"></div>
 
+    <div class="game-container">
         <div id="board">
-            <div id="rail"></div> <div id="ball"></div>
+            <div id="target-area"></div>
+            <div id="ball"></div>
         </div>
 
-        <div class="dmd-display">
-            <div id="timer">10.0s</div>
-            <div class="score-info">CREDITS: 1</div>
-        </div>
-        
-        <button id="launch-btn" class="btn-launch" onclick="launchBall()">테스트 가즈아!</button>
+        <div id="timer">10.0s</div>
+        <button id="start-btn" class="btn-start" onclick="startGame()">테스트 가즈아!</button>
+    </div>
 
-        <div id="result-popup">
-            <img id="result-img" src="" alt="결과 이미지">
-            <div id="result-msg" class="msg"></div>
-            <div class="bank-box">
-                <div class="donate-icon"></div> <p style="margin: 0 0 10px;">좀비로 판명된 하남자는 대리비를 입금하시오.</p>
-                <span class="copy-btn" onclick="copyAccount()">케이뱅크 100-210-317446</span>
-            </div>
+    <div id="result-popup">
+        <img id="result-img" src="" alt="결과 이미지">
+        <div id="result-msg" class="msg"></div>
+        <div class="bank-box">
+            <p style="margin: 0 0 10px;">좀비로 판명된 하남자는 대리비를 입금하시오.</p>
+            <span class="copy-btn" onclick="copyAccount()">케이뱅크 100-210-317446</span>
         </div>
     </div>
 
     <script>
         let ball = document.getElementById('ball');
         let timerDisplay = document.getElementById('timer');
-        let launchBtn = document.getElementById('launch-btn');
+        let startBtn = document.getElementById('start-btn');
         let resultPopup = document.getElementById('result-popup');
         let resultMsg = document.getElementById('result-msg');
         let resultImg = document.getElementById('result-img');
+        let animeBg = document.getElementById('anime-bg');
 
         // 🖼️ 결과 이미지 URL 세팅 (형님이 원하시는 이미지로 교체 가능)
         const SUCCESS_IMG = "https://i.ibb.co/v44m5Yg/success-stamp.png"; 
@@ -112,7 +95,7 @@
         let isPlaying = false;
         let gameInterval;
 
-        function launchBall() {
+        function startGame() {
             if (typeof DeviceOrientationEvent.requestPermission === 'function') {
                 DeviceOrientationEvent.requestPermission()
                     .then(permissionState => {
@@ -131,10 +114,9 @@
             isPlaying = true;
             timeLeft = 10;
             x = 0; y = 0;
-            launchBtn.disabled = true;
+            startBtn.disabled = true;
             resultPopup.style.display = 'none';
-            // 핀볼 공 발사 이미지 (형님이 이미지 준비되면)
-            ball.style.background = "url('https://i.ibb.co/3sX84Xm/chemical-vial.png') center/cover"; 
+            animeBg.classList.remove('active'); // 처음엔 흑백
             
             window.addEventListener('deviceorientation', handleOrientation);
             
@@ -143,7 +125,7 @@
                 timerDisplay.innerText = timeLeft.toFixed(1) + "s";
 
                 let distance = Math.sqrt(x*x + y*y);
-                if (distance > 38) { // 핀볼 감도 (앰플이 탈출하면 탈락)
+                if (distance > 40) { // [핵심] 앰플이 검은색 원을 넘어가면 탈락 (감도 빡세게)
                     endGame(false);
                 }
 
@@ -155,13 +137,13 @@
 
         function handleOrientation(event) {
             // 자이로 센서 데이터 받기
-            let moveX = event.gamma * 2.2; // 감도 조금 더 높임
-            let moveY = event.beta * 2.2;
+            let moveX = event.gamma * 2.3; // 감도 조절
+            let moveY = event.beta * 2.3;
 
             x = moveX;
             y = moveY;
 
-            // 핀볼 시약 위치 이동 (부드럽게 이미지 업데이트)
+            // 시약 위치 이동 (부드럽게 이미지 업데이트)
             ball.style.left = `calc(50% + ${x}px)`;
             ball.style.top = `calc(50% + ${y}px)`;
         }
@@ -170,7 +152,7 @@
             isPlaying = false;
             clearInterval(gameInterval);
             window.removeEventListener('deviceorientation', handleOrientation);
-            launchBtn.disabled = false;
+            startBtn.disabled = false;
             timerDisplay.innerText = "10.0s";
 
             resultPopup.style.display = 'block';
@@ -182,8 +164,7 @@
                 resultImg.src = FAIL_IMG;
                 resultMsg.innerText = "[음주 좀비 처단]";
                 resultMsg.style.color = "#ff003c";
-                // 핀볼 깨진 이미지 (형님이 이미지 준비되면)
-                ball.style.background = "url('https://raw.githubusercontent.com/yannick-code/gif-lib/master/target_pulse.gif') center/cover"; 
+                animeBg.classList.add('active'); // 좀비 뜨면 배경 컬러+애니메이션 발동!
                 if (navigator.vibrate) navigator.vibrate(500);
             }
         }
