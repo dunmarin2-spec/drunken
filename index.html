@@ -3,76 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🤪 애니메 좀비 콜라주</title>
+    <title>🤪 애니메 좀비 판독기 (노-엑박)</title>
     <style>
-        :root { --matrix-green: #39ff14; --neon-red: #ff003c; --gold: #ffd700; }
-        
+        :root { --matrix-green: #39ff14; --neon-red: #ff003c; --gold: #ffd700; --dark: #000; }
         @font-face { font-family: 'DungGeunMo'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff') format('woff'); font-weight: normal; font-style: normal; }
         
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'DungGeunMo', sans-serif; cursor: pointer; text-transform: uppercase; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'DungGeunMo', sans-serif; background: #000; }
         
-        /* 🖼️ [핵심] 배경 이미지: 각종 애니메이션 캐릭터 콜라주 (형님이 원하시는 이미지 URL로 교체 가능) */
-        .anime-collage { 
+        /* 🖼️ 배경: 이미지 대신 60마리 애니메이션 캐릭터 이모지 콜라주 */
+        .anime-wall { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://i.ibb.co/68fK97V/pinball-circuit.png') no-repeat center center fixed; /* 임시 콜라주 이미지 */
-            background-size: cover; z-index: -1; filter: grayscale(100%); /* 처음엔 흑백으로 밑밥 */
-            transition: 0.5s;
+            display: flex; flex-wrap: wrap; justify-content: space-around; align-content: space-around;
+            font-size: 2rem; opacity: 0.2; filter: grayscale(100%); z-index: -1; transition: 0.3s;
         }
-        .anime-collage.active { filter: grayscale(0%); animation: animate-bg 10s linear infinite; } /* 귀신 뜨면 컬러+애니메이션 */
+        .anime-wall.active { opacity: 0.8; filter: grayscale(0%); animation: shake 0.1s infinite; }
 
-        /* 게임 보드: 맨 처음의 블랙홀 원 */
-        .game-container { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .game-container { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
         
-        #board { width: 320px; height: 320px; position: relative; margin: 0 auto; 
-                 /* 🌑 칠흑 같은 검은색 블랙홀 원 */
-                 background: #000; border-radius: 50%; box-shadow: 0 0 40px #000, inset 0 0 20px #111; overflow: hidden; border: 4px solid #333; }
+        /* 🌑 형님이 주문하신 블랙홀 원 */
+        #board { width: 300px; height: 300px; position: relative; background: #000; border-radius: 50%; border: 5px solid #222; box-shadow: 0 0 50px rgba(0,0,0,1); overflow: hidden; }
         
-        /* 중앙 타겟 영역 이미지 (블랙홀 안의 미세한 파동) */
-        #target-area { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70px; height: 70px; border-radius: 50%; background: url('https://raw.githubusercontent.com/yannick-code/gif-lib/master/target_pulse.gif') center/cover; opacity: 0.3; }
-        
-        /* 🧪 구슬 이미지: 독극물 앰플 */
-        #ball { position: absolute; top: 50%; left: 50%; width: 45px; height: 45px; background: url('https://i.ibb.co/3sX84Xm/chemical-vial.png') center/cover; transform: translate(-50%, -50%); transition: 0.04s linear; filter: drop-shadow(0 0 15px var(--matrix-green)); z-index: 10; }
+        /* 🧪 구슬: 이미지 대신 화려한 형광 앰플 이모지 */
+        #ball { position: absolute; top: 50%; left: 50%; width: 50px; height: 50px; line-height: 50px; font-size: 2.5rem; text-align: center; transform: translate(-50%, -50%); transition: 0.05s linear; filter: drop-shadow(0 0 10px var(--matrix-green)); z-index: 20; }
 
-        /* 타이머 & 버튼 */
-        #timer { font-size: 2.8rem; margin: 20px 0; color: #fff; text-shadow: 0 0 10px rgba(0,0,0,0.7); }
-        .btn-start { padding: 20px 40px; background: rgba(0,0,0,0.8); color: var(--matrix-green); border: 3px solid var(--matrix-green); border-radius: 15px; font-size: 1.3rem; font-family: 'DungGeunMo', sans-serif; cursor: pointer; transition: 0.1s; box-shadow: 0 0 15px rgba(57, 255, 20, 0.5); }
-        .btn-start:active { background: var(--matrix-green); color: #000; box-shadow: 0 0 25px var(--matrix-green); }
+        #timer { font-size: 3rem; margin: 25px 0; color: #fff; text-shadow: 0 0 10px #000; }
+        .btn-start { padding: 20px 50px; background: #111; color: var(--matrix-green); border: 3px solid var(--matrix-green); border-radius: 15px; font-size: 1.5rem; font-family: 'DungGeunMo'; cursor: pointer; box-shadow: 0 0 15px rgba(57,255,20,0.5); }
+        .btn-start:active { transform: scale(0.95); background: var(--matrix-green); color: #000; }
         
-        /* 결과 팝업 */
-        #result-popup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 400px; background: rgba(0,0,0,0.95); padding: 30px; border-radius: 20px; border: 4px solid var(--neon-red); text-align: center; animation: scaleIn 0.3s forwards; z-index: 100; }
-        
-        /* 🖼️ 결과 이미지 (합격/탈락) */
-        #result-img { width: 100px; height: 100px; margin-bottom: 15px; filter: drop-shadow(0 0 10px #fff); }
-        .msg { font-size: 1.5rem; font-weight: bold; margin-bottom: 20px; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
-        
-        /* 후원 섹션 */
-        .bank-box { background: #111; padding: 15px; border-radius: 10px; font-size: 0.85rem; border: 1px solid #333; position: relative; }
-        .copy-btn { color: var(--gold); cursor: pointer; font-weight: bold; text-shadow: 0 0 5px rgba(255,215,0,0.5); font-size: 1rem; }
+        #result-popup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; background: rgba(0,0,0,0.95); padding: 30px; border-radius: 20px; border: 4px solid var(--neon-red); text-align: center; z-index: 100; animation: pop 0.3s forwards; }
+        .result-emoji { font-size: 5rem; margin-bottom: 15px; display: block; }
+        .msg { font-size: 1.6rem; font-weight: bold; margin-bottom: 20px; }
+        .copy-btn { color: var(--gold); cursor: pointer; font-size: 1.1rem; text-decoration: underline; }
 
-        /* 애니메이션 */
-        @keyframes scaleIn { from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
-        @keyframes animate-bg { 0% { background-position: 0 0; } 100% { background-position: 100% 100%; } } /* 배경 이미지 움직이게 */
+        @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 50% { transform: translate(-1px, -2px) rotate(-1deg); } 100% { transform: translate(1px, -1px) rotate(1deg); } }
+        @keyframes pop { from { transform: translate(-50%, -50%) scale(0.5); } to { translate(-50%, -50%) scale(1); } }
     </style>
 </head>
 <body>
 
-    <div id="anime-bg" class="anime-collage"></div>
+    <div id="anime-wall" class="anime-wall">
+        <span>🏃</span><span>🔥</span><span>⚡</span><span>👊</span><span>🏴‍☠️</span><span>🗡️</span><span>🐉</span><span>🏀</span><span>🎾</span><span>⚽</span>
+        <span>👒</span><span>🦊</span><span>👹</span><span>👻</span><span>🤖</span><span>👾</span><span>👽</span><span>🦄</span><span>🐱</span><span>🐭</span>
+        <span>🐰</span><span>🦊</span><span>🐻</span><span>🐼</span><span>🐨</span><span>🐯</span><span>🦁</span><span>🐮</span><span>🐷</span><span>🐸</span>
+        <span>🐵</span><span>🐔</span><span>🐧</span><span>🐦</span><span>🐤</span><span>🦆</span><span>🦅</span><span>🦉</span><span>🦇</span><span>🐺</span>
+        <span>🐗</span><span>🐴</span><span>🦄</span><span>🐝</span><span>태</span><span>🦋</span><span>🐌</span><span>🐞</span><span>🐜</span><span>🦗</span>
+        <span>🕷️</span><span>🦂</span><span>🐢</span><span>🐍</span><span>🦎</span><span>🐙</span><span>🦑</span><span>🦐</span><span>🦀</span><span>🐡</span>
+    </div>
 
     <div class="game-container">
         <div id="board">
-            <div id="target-area"></div>
-            <div id="ball"></div>
+            <div id="ball">🧪</div>
         </div>
-
-        <div id="timer">10.0s</div>
+        <div id="timer">10.0S</div>
         <button id="start-btn" class="btn-start" onclick="startGame()">테스트 가즈아!</button>
     </div>
 
     <div id="result-popup">
-        <img id="result-img" src="" alt="결과 이미지">
+        <span id="result-emoji" class="result-emoji"></span>
         <div id="result-msg" class="msg"></div>
-        <div class="bank-box">
-            <p style="margin: 0 0 10px;">좀비로 판명된 하남자는 대리비를 입금하시오.</p>
+        <div style="background:#222; padding:15px; border-radius:10px;">
+            <p style="margin:0 0 10px; font-size:0.8rem; color:#aaa;">좀비 하남자는 대리비를 입금하시오.</p>
             <span class="copy-btn" onclick="copyAccount()">케이뱅크 100-210-317446</span>
         </div>
     </div>
@@ -81,90 +71,56 @@
         let ball = document.getElementById('ball');
         let timerDisplay = document.getElementById('timer');
         let startBtn = document.getElementById('start-btn');
-        let resultPopup = document.getElementById('result-popup');
-        let resultMsg = document.getElementById('result-msg');
-        let resultImg = document.getElementById('result-img');
-        let animeBg = document.getElementById('anime-bg');
+        let wall = document.getElementById('anime-wall');
+        let popup = document.getElementById('result-popup');
+        let resMsg = document.getElementById('result-msg');
+        let resEmoji = document.getElementById('result-emoji');
 
-        // 🖼️ 결과 이미지 URL 세팅 (형님이 원하시는 이미지로 교체 가능)
-        const SUCCESS_IMG = "https://i.ibb.co/v44m5Yg/success-stamp.png"; 
-        const FAIL_IMG = "https://i.ibb.co/M9B7X25/zombie-icon.png"; 
-
-        let x = 0, y = 0; 
-        let timeLeft = 10;
-        let isPlaying = false;
-        let gameInterval;
+        let x = 0, y = 0, timeLeft = 10, isPlaying = false, gameInterval;
 
         function startGame() {
             if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                DeviceOrientationEvent.requestPermission()
-                    .then(permissionState => {
-                        if (permissionState === 'granted') {
-                            initGame();
-                        }
-                    })
-                    .catch(console.error);
-            } else {
-                initGame();
-            }
+                DeviceOrientationEvent.requestPermission().then(state => {
+                    if (state === 'granted') initGame();
+                });
+            } else { initGame(); }
         }
 
         function initGame() {
             if (isPlaying) return;
-            isPlaying = true;
-            timeLeft = 10;
-            x = 0; y = 0;
+            isPlaying = true; timeLeft = 10; x = 0; y = 0;
             startBtn.disabled = true;
-            resultPopup.style.display = 'none';
-            animeBg.classList.remove('active'); // 처음엔 흑백
-            
+            popup.style.display = 'none';
+            wall.classList.remove('active');
             window.addEventListener('deviceorientation', handleOrientation);
             
             gameInterval = setInterval(() => {
                 timeLeft -= 0.1;
-                timerDisplay.innerText = timeLeft.toFixed(1) + "s";
-
-                let distance = Math.sqrt(x*x + y*y);
-                if (distance > 40) { // [핵심] 앰플이 검은색 원을 넘어가면 탈락 (감도 빡세게)
-                    endGame(false);
-                }
-
-                if (timeLeft <= 0) {
-                    endGame(true);
-                }
+                timerDisplay.innerText = timeLeft.toFixed(1) + "S";
+                let dist = Math.sqrt(x*x + y*y);
+                if (dist > 130) endGame(false); // 블랙홀(300px) 탈출 시 패배
+                if (timeLeft <= 0) endGame(true);
             }, 100);
         }
 
-        function handleOrientation(event) {
-            // 자이로 센서 데이터 받기
-            let moveX = event.gamma * 2.3; // 감도 조절
-            let moveY = event.beta * 2.3;
-
-            x = moveX;
-            y = moveY;
-
-            // 시약 위치 이동 (부드럽게 이미지 업데이트)
+        function handleOrientation(e) {
+            x = e.gamma * 3; y = e.beta * 3;
             ball.style.left = `calc(50% + ${x}px)`;
             ball.style.top = `calc(50% + ${y}px)`;
         }
 
-        function endGame(isSuccess) {
-            isPlaying = false;
-            clearInterval(gameInterval);
+        function endGame(win) {
+            isPlaying = false; clearInterval(gameInterval);
             window.removeEventListener('deviceorientation', handleOrientation);
             startBtn.disabled = false;
-            timerDisplay.innerText = "10.0s";
-
-            resultPopup.style.display = 'block';
-            if (isSuccess) {
-                resultImg.src = SUCCESS_IMG;
-                resultMsg.innerText = "[인간 인증]";
-                resultMsg.style.color = "#39ff14";
+            popup.style.display = 'block';
+            if (win) {
+                resEmoji.innerText = "👨‍💼"; resMsg.innerText = "[인간 인증] 합격!";
+                resMsg.style.color = "#39ff14";
             } else {
-                resultImg.src = FAIL_IMG;
-                resultMsg.innerText = "[음주 좀비 처단]";
-                resultMsg.style.color = "#ff003c";
-                animeBg.classList.add('active'); // 좀비 뜨면 배경 컬러+애니메이션 발동!
+                resEmoji.innerText = "🧟"; resMsg.innerText = "[음주 좀비] 즉시 처단!";
+                resMsg.style.color = "#ff003c";
+                wall.classList.add('active'); // 탈락 시 배경 캐릭터들 미친듯이 발광
                 if (navigator.vibrate) navigator.vibrate(500);
             }
         }
@@ -172,7 +128,7 @@
         function copyAccount() {
             const acc = "케이뱅크 100-210-317446";
             navigator.clipboard.writeText(acc);
-            alert("계좌번호 복사 완료! 형님, 대리비 입금 가즈아!\n\n" + acc);
+            alert("계좌번호 복사 완료!\n\n" + acc);
         }
     </script>
 </body>
