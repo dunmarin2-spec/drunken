@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🍺 음주 좀비 판독기</title>
+    <style>
+        :root { --neon: #39ff14; --dark: #000000; --red: #ff4757; }
+        body { background: var(--dark); color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        
+        .container { text-align: center; width: 90%; max-width: 400px; }
+        h1 { color: var(--neon); font-size: 1.5rem; margin-bottom: 5px; text-shadow: 0 0 10px var(--neon); }
+        .desc { font-size: 0.8rem; color: #888; margin-bottom: 30px; }
+
+        /* 게임 보드 */
+        #board { width: 300px; height: 300px; border: 4px solid #333; border-radius: 50%; position: relative; margin: 0 auto; background: radial-gradient(#111, #000); overflow: hidden; }
+        #target-area { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; border: 2px dashed var(--neon); border-radius: 50%; }
+        #ball { position: absolute; top: 50%; left: 50%; width: 30px; height: 30px; background: var(--neon); border-radius: 50%; transform: translate(-50%, -50%); transition: 0.05s linear; box-shadow: 0 0 15px var(--neon); }
+
+        /* 타이머 & 결과 */
+        #timer { font-size: 2.5rem; font-weight: 900; margin: 20px 0; color: #fff; }
+        .btn-start { width: 100%; padding: 18px; background: var(--neon); color: #000; border: none; border-radius: 12px; font-size: 1.2rem; font-weight: bold; cursor: pointer; }
+        
+        #result-popup { display: none; margin-top: 20px; animation: fadeInUp 0.5s; }
+        .msg { font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; }
+        
+        /* 후원 섹션 */
+        .bank-box { background: #1a1a1a; padding: 15px; border-radius: 10px; font-size: 0.85rem; border: 1px solid #333; }
+        .copy-btn { color: var(--neon); cursor: pointer; text-decoration: underline; font-weight: bold; }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🍺 좀비 판독기</h1>
+        <p class="desc">구슬을 10초간 중앙 점선 안에 가두십시오.</p>
+
+        <div id="board">
+            <div id="target-area"></div>
+            <div id="ball"></div>
+        </div>
+
+        <div id="timer">10.0s</div>
+        <button id="start-btn" class="btn-start" onclick="startGame()">테스트 시작!</button>
+
+        <div id="result-popup">
+            <div id="result-msg" class="msg"></div>
+            <div class="bank-box">
+                탈락자는 대리비 입금 가즈아!<br>
+                <span class="copy-btn" onclick="copyAccount()">케이뱅크 100-210-317446</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ball = document.getElementById('ball');
+        let timerDisplay = document.getElementById('timer');
+        let startBtn = document.getElementById('start-btn');
+        let resultPopup = document.getElementById('result-popup');
+        let resultMsg = document.getElementById('result-msg');
+
+        let x = 0, y = 0; // 구슬 위치
+        let timeLeft = 10;
+        let isPlaying = false;
+        let gameInterval;
+
+        // 센서 권한 요청 (iOS 등 대응)
+        function startGame() {
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            initGame();
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                initGame();
+            }
+        }
+
+        function initGame() {
+            if (isPlaying) return;
+            isPlaying = true;
+            timeLeft = 10;
+            x = 0; y = 0;
+            startBtn.disabled = true;
+            resultPopup.style.display = 'none';
+            
+            window.addEventListener('deviceorientation', handleOrientation);
+            
+            gameInterval = setInterval(() => {
+                timeLeft -= 0.1;
+                timerDisplay.innerText = timeLeft.toFixed(1) + "s";
+
+                // 구슬이 중앙에서 너무 멀어지면 탈락 (60px 범위)
+                let distance = Math.sqrt(x*x + y*y);
+                if (distance > 30) { 
+                    endGame(false);
+                }
+
+                if (timeLeft <= 0) {
+                    endGame(true);
+                }
+            }, 100);
+        }
+
+        function handleOrientation(event) {
+            // 기울기 데이터를 구슬 좌표로 변환
+            // beta: 앞뒤(-180~180), gamma: 좌우(-90~90)
+            let moveX = event.gamma * 2; 
+            let moveY = event.beta * 2;
+
+            x = moveX;
+            y = moveY;
+
+            // 구슬 이동 제한 (보드 안에서만)
+            ball.style.left = `calc(50% + ${x}px)`;
+            ball.style.top = `calc(50% + ${y}px)`;
+        }
+
+        function endGame(isSuccess) {
+            isPlaying = false;
+            clearInterval(gameInterval);
+            window.removeEventListener('deviceorientation', handleOrientation);
+            startBtn.disabled = false;
+            timerDisplay.innerText = "10.0s";
+
+            resultPopup.style.display = 'block';
+            if (isSuccess) {
+                resultMsg.innerText = "✅ 합격! 당신은 인간입니다.";
+                resultMsg.style.color = "#39ff14";
+            } else {
+                resultMsg.innerText = "🚨 탈락! 당신은 음주 좀비입니다.";
+                resultMsg.style.color = "#ff4757";
+                if (navigator.vibrate) navigator.vibrate(500);
+            }
+        }
+
+        function copyAccount() {
+            const acc = "케이뱅크 100-210-317446";
+            navigator.clipboard.writeText(acc);
+            alert("계좌번호 복사 완료! 대리비 입금 부탁드립니다.\n\n" + acc);
+        }
+    </script>
+</body>
+</html>
