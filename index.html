@@ -3,82 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🌟 애니메 좀비 판독기 V3</title>
+    <title>🐉 4성구 서바이벌: 좀비 판독기</title>
     <style>
         :root { --matrix-green: #39ff14; --neon-red: #ff003c; --gold: #ffd700; }
         @font-face { font-family: 'DungGeunMo'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff') format('woff'); font-weight: normal; font-style: normal; }
         
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'DungGeunMo', sans-serif; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'DungGeunMo', sans-serif; background: #000; }
         
-        /* 🖼️ 배경: 검은색 싹 없애고, 화려한 그라데이션 + 캐릭터 이모지 꽉꽉 채움 */
-        body {
-            background-color: #ff9a9e;
-            background-image: linear-gradient(45deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+        /* 🖼️ 배경: 형님이 만드신 이미지를 bg.jpg로 연결 (없으면 까만색) */
+        .bg-image { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('bg.jpg') no-repeat center center; 
+            background-size: cover; 
+            z-index: 0; filter: brightness(0.6); transition: 0.2s;
         }
-
-        .anime-wall { 
-            position: fixed; top: -10%; left: -10%; width: 120%; height: 120%;
-            display: flex; flex-wrap: wrap; justify-content: space-around; align-content: space-around;
-            font-size: 2.5rem; /* 캐릭터 큼직하게 */
-            z-index: 0; 
-            line-height: 1.5;
-            text-shadow: 2px 2px 5px rgba(0,0,0,0.2);
-            transition: 0.2s;
-        }
-        
-        /* 좀비 판정 시 배경이 미친듯이 발광함 */
-        .anime-wall.zombie-mode { animation: panic 0.2s infinite; filter: hue-rotate(90deg) contrast(150%); }
+        /* 좀비 판정 시 배경 붉게 깜빡임 */
+        .bg-image.zombie { animation: bloody-flicker 0.2s infinite; }
 
         .game-wrapper { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
         
-        /* 🌑 가운데 블랙홀: 여기만 까만색! */
+        /* 🌑 좁아진 블랙홀 (지름 140px) */
         #board { 
-            width: 320px; height: 320px; position: relative; 
+            width: 140px; height: 140px; position: relative; 
             background: #000000; 
             border-radius: 50%; 
-            border: 8px solid var(--matrix-green); 
-            box-shadow: 0 0 40px rgba(0,0,0,0.8), inset 0 0 50px rgba(255,255,255,0.1); 
-            overflow: hidden; 
+            border: 6px solid var(--matrix-green); 
+            box-shadow: 0 0 30px rgba(57,255,20,0.8), inset 0 0 40px rgba(0,0,0,1); 
         }
         
-        /* 🧪 구슬: 시약병 */
-        #ball { position: absolute; top: 50%; left: 50%; width: 50px; height: 50px; line-height: 50px; font-size: 2.5rem; text-align: center; transform: translate(-50%, -50%); transition: 0.05s linear; filter: drop-shadow(0 0 10px var(--matrix-green)); z-index: 20; }
+        /* 🟠 코딩으로 직접 깎아 만든 절대 안 깨지는 4성구 (지름 80px) */
+        #ball { 
+            position: absolute; top: 50%; left: 50%; width: 80px; height: 80px; 
+            border-radius: 50%; transform: translate(-50%, -50%); transition: 0.05s linear;
+            background: radial-gradient(circle at 30% 30%, #ffdf00, #ff8c00, #cc3300);
+            box-shadow: inset -5px -5px 15px rgba(0,0,0,0.6), 0 0 15px rgba(255,140,0,0.8);
+            display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+            padding: 15px; box-sizing: border-box; z-index: 20;
+        }
+        /* 4성구의 별 4개 */
+        .star { color: #d32f2f; font-size: 20px; line-height: 0.8; text-shadow: 1px 1px 0 rgba(255,255,255,0.4); }
 
-        /* 하단 UI 박스 (글씨 잘 보이게 까만 배경 살짝 줌) */
-        .ui-box { margin-top: 30px; background: rgba(0,0,0,0.85); padding: 20px 40px; border-radius: 25px; border: 2px solid #555; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        
-        #timer { font-size: 3.5rem; color: #fff; text-shadow: 0 0 10px var(--matrix-green); margin-bottom: 15px; margin-top: 0; }
-        
-        .btn-start { padding: 15px 40px; background: #222; color: var(--matrix-green); border: 3px solid var(--matrix-green); border-radius: 12px; font-size: 1.5rem; font-family: 'DungGeunMo'; cursor: pointer; box-shadow: 0 0 15px rgba(57,255,20,0.3); transition: 0.1s; }
+        .ui-box { margin-top: 50px; text-align: center; }
+        #timer { font-size: 4rem; color: #fff; text-shadow: 0 0 15px var(--matrix-green); margin: 0 0 15px 0; }
+        .btn-start { padding: 15px 40px; background: rgba(0,0,0,0.8); color: var(--matrix-green); border: 3px solid var(--matrix-green); border-radius: 12px; font-size: 1.5rem; font-family: 'DungGeunMo'; cursor: pointer; box-shadow: 0 0 15px rgba(57,255,20,0.5); }
         .btn-start:active { transform: scale(0.95); background: var(--matrix-green); color: #000; }
-        .btn-start:disabled { border-color: #555; color: #555; box-shadow: none; cursor: not-allowed; }
         
-        /* 결과 팝업 */
-        #result-popup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; max-width: 350px; background: rgba(0,0,0,0.95); padding: 30px; border-radius: 20px; border: 4px solid var(--neon-red); text-align: center; z-index: 100; animation: pop 0.3s forwards; box-shadow: 0 0 50px rgba(255,0,60,0.5); }
-        .result-emoji { font-size: 6rem; margin-bottom: 10px; display: block; filter: drop-shadow(0 0 20px rgba(255,255,255,0.5)); }
-        .msg { font-size: 1.8rem; font-weight: bold; margin-bottom: 25px; }
-        .copy-btn { color: var(--gold); cursor: pointer; font-size: 1.2rem; text-decoration: underline; text-shadow: 0 0 5px var(--gold); }
+        /* 🚨 대문짝만한 결과 팝업 */
+        #result-popup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; text-align: center; z-index: 100; animation: smash 0.2s forwards; }
+        
+        /* 형님이 원하신 대문짝만한 글씨 */
+        .huge-warning { font-size: 4.5rem; color: var(--neon-red); font-weight: 900; text-shadow: 0 0 20px var(--neon-red), 0 0 50px #000; margin-bottom: 20px; line-height: 1.2; word-break: keep-all; }
+        .success-msg { font-size: 4rem; color: var(--matrix-green); font-weight: 900; text-shadow: 0 0 20px var(--matrix-green), 0 0 50px #000; margin-bottom: 20px; }
+        
+        .bank-box { background: rgba(0,0,0,0.9); padding: 20px; border-radius: 15px; border: 2px solid #444; display: inline-block; }
+        .copy-btn { color: var(--gold); cursor: pointer; font-size: 1.3rem; text-decoration: underline; text-shadow: 0 0 5px var(--gold); }
 
-        @keyframes panic { 0% { transform: translate(5px, 5px) scale(1.02); } 50% { transform: translate(-5px, -5px) scale(0.98); } 100% { transform: translate(5px, -5px) scale(1.02); } }
-        @keyframes pop { from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } to { translate(-50%, -50%) scale(1); opacity: 1; } }
+        @keyframes bloody-flicker { 0% { filter: hue-rotate(0deg) contrast(150%) brightness(0.5) sepia(1) hue-rotate(-50deg) saturate(5); } 100% { filter: hue-rotate(10deg) contrast(180%) brightness(0.8) sepia(1) hue-rotate(-50deg) saturate(5); } }
+        @keyframes smash { 0% { transform: translate(-50%, -50%) scale(3); opacity: 0; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <div id="anime-wall" class="anime-wall">
-        <span>🦊</span><span>👺</span><span>🐉</span><span>⚡</span><span>👊</span><span>🏴‍☠️</span><span>🤖</span><span>👾</span><span>👽</span><span>🦄</span>
-        <span>🐶</span><span>🐱</span><span>🐭</span><span>🐰</span><span>🐻</span><span>🐼</span><span>🐨</span><span>🐯</span><span>🦁</span><span>🐮</span>
-        <span>🐷</span><span>🐸</span><span>🐵</span><span>🐔</span><span>🐧</span><span>🐦</span><span>🐤</span><span>🦆</span><span>🦅</span><span>🦉</span>
-        <span>🦇</span><span>🐺</span><span>🐗</span><span>🐴</span><span>🦄</span><span>🐝</span><span>🦋</span><span>🐌</span><span>🐞</span><span>🐜</span>
-        <span>🦗</span><span>🕷️</span><span>🦂</span><span>🐢</span><span>🐍</span><span>🦎</span><span>🐙</span><span>🦑</span><span>🦐</span><span>🦀</span>
-        <span>🐡</span><span>🐠</span><span>🐟</span><span>🐬</span><span>🐳</span><span>🐋</span><span>🦈</span><span>🐊</span><span>🐅</span><span>🐆</span>
-        <span>🦊</span><span>👺</span><span>🐉</span><span>⚡</span><span>👊</span><span>🏴‍☠️</span><span>🤖</span><span>👾</span><span>👽</span><span>🦄</span>
-        <span>🐶</span><span>🐱</span><span>🐭</span><span>🐰</span><span>🐻</span><span>🐼</span><span>🐨</span><span>🐯</span><span>🦁</span><span>🐮</span>
-    </div>
+    <div id="bg" class="bg-image"></div>
 
     <div class="game-wrapper">
         <div id="board">
-            <div id="ball">🧪</div>
+            <div id="ball">
+                <span class="star">★</span><span class="star">★</span>
+                <span class="star">★</span><span class="star">★</span>
+            </div>
         </div>
         
         <div class="ui-box">
@@ -88,10 +81,9 @@
     </div>
 
     <div id="result-popup">
-        <span id="result-emoji" class="result-emoji"></span>
-        <div id="result-msg" class="msg"></div>
-        <div style="background:#222; padding:15px; border-radius:12px; border: 1px solid #444;">
-            <p style="margin:0 0 10px; font-size:0.9rem; color:#ccc;">좀비로 판명된 자, 대리비를 입금하라.</p>
+        <div id="result-text"></div>
+        <div class="bank-box">
+            <p style="margin:0 0 10px; font-size:1rem; color:#fff;">좀비는 얌전히 대리비를 입금하라.</p>
             <span class="copy-btn" onclick="copyAccount()">케이뱅크 100-210-317446</span>
         </div>
     </div>
@@ -100,10 +92,9 @@
         let ball = document.getElementById('ball');
         let timerDisplay = document.getElementById('timer');
         let startBtn = document.getElementById('start-btn');
-        let wall = document.getElementById('anime-wall');
+        let bg = document.getElementById('bg');
         let popup = document.getElementById('result-popup');
-        let resMsg = document.getElementById('result-msg');
-        let resEmoji = document.getElementById('result-emoji');
+        let resText = document.getElementById('result-text');
 
         let x = 0, y = 0, timeLeft = 10, isPlaying = false, gameInterval;
 
@@ -120,9 +111,8 @@
             isPlaying = true; timeLeft = 10; x = 0; y = 0;
             startBtn.disabled = true;
             popup.style.display = 'none';
-            wall.classList.remove('zombie-mode');
+            bg.classList.remove('zombie');
             
-            // 중앙 초기화
             ball.style.left = `50%`;
             ball.style.top = `50%`;
             
@@ -132,9 +122,9 @@
                 timeLeft -= 0.1;
                 timerDisplay.innerText = timeLeft.toFixed(1) + "S";
                 
-                // 중심점 기준 거리 계산 (블랙홀 반지름 160px - 구슬 절반 25px = 135px 넘어가면 아웃)
+                // 💡 난이도 극악: 블랙홀 반지름 70px, 4성구 반지름 40px -> 30px만 벗어나도 아웃!
                 let dist = Math.sqrt(x*x + y*y);
-                if (dist > 130) { 
+                if (dist > 30) { 
                     endGame(false); 
                 }
 
@@ -145,9 +135,8 @@
         }
 
         function handleOrientation(e) {
-            // 기울기 값 증폭 (안드로이드/iOS 호환)
-            x = (e.gamma || 0) * 3; 
-            y = (e.beta || 0) * 3;
+            x = (e.gamma || 0) * 2; 
+            y = (e.beta || 0) * 2;
             
             ball.style.left = `calc(50% + ${x}px)`;
             ball.style.top = `calc(50% + ${y}px)`;
@@ -160,15 +149,13 @@
             popup.style.display = 'block';
             
             if (win) {
-                resEmoji.innerText = "😎"; 
-                resMsg.innerText = "[인간 인증] 합격!";
-                resMsg.style.color = "#39ff14";
+                resText.className = "success-msg";
+                resText.innerHTML = "합격!<br>인간 생존";
             } else {
-                resEmoji.innerText = "🧟‍♂️"; 
-                resMsg.innerText = "[음주 좀비] 즉시 처단!";
-                resMsg.style.color = "#ff003c";
-                wall.classList.add('zombie-mode'); // 탈락 시 배경 미친듯이 깜빡임
-                if (navigator.vibrate) navigator.vibrate([500, 200, 500]);
+                resText.className = "huge-warning";
+                resText.innerHTML = "경고 :<br>좀비 출현!";
+                bg.classList.add('zombie'); // 배경 피바다로 변함
+                if (navigator.vibrate) navigator.vibrate([1000]); // 탈락 시 길게 진동
             }
         }
 
