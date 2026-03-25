@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🐉 찐 4성구 서바이벌: 좀비 폭격기</title>
     <style>
-        :root { --matrix-green: #39ff14; --neon-red: #ff003c; --gold: #ffd700; --dark: #000; }
+        :root { --matrix-green: #39ff14; --neon-red: #ff003c; --gold: #ffd700; --dark: #000; --kakao-yellow: #fee500; }
         @font-face { font-family: 'DungGeunMo'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff') format('woff'); font-weight: normal; font-style: normal; }
         
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'DungGeunMo', sans-serif; background: #000; }
@@ -49,14 +49,19 @@
         .btn-start { padding: 20px 50px; background: rgba(0,0,0,0.8); color: var(--matrix-green); border: 3px solid var(--matrix-green); border-radius: 15px; font-size: 1.5rem; font-family: 'DungGeunMo'; cursor: pointer; transition: 0.1s; box-shadow: 0 0 15px rgba(57,255,20,0.5); }
         .btn-start:active { transform: scale(0.95); background: var(--matrix-green); color: #000; box-shadow: 0 0 25px var(--matrix-green); }
         
-        /* 🚨 결과 팝업 */
         #result-popup { display: none; position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 100%; text-align: center; z-index: 100; animation: smash 0.2s forwards; }
         .huge-warning { font-size: 4.5rem; color: var(--neon-red); font-weight: 900; text-shadow: 0 0 20px var(--neon-red), 0 0 50px #000; margin-bottom: 20px; line-height: 1.2; word-break: keep-all; }
         
         .bank-box { background: rgba(0,0,0,0.95); padding: 25px; border-radius: 15px; border: 2px solid #444; display: inline-block; box-shadow: 0 0 30px rgba(255,0,0,0.5); width: 80%; max-width: 300px;}
-        .copy-btn { color: var(--gold); cursor: pointer; font-size: 1.2rem; text-decoration: underline; text-shadow: 0 0 5px var(--gold); }
+        
+        /* 💛 카카오페이 송금 버튼 스타일 */
+        .pay-btn { 
+            display: block; background: var(--kakao-yellow); color: #3c1e1e; 
+            padding: 15px; border-radius: 10px; font-weight: 900; font-size: 1.1rem;
+            text-decoration: none; margin-top: 10px; cursor: pointer; transition: 0.2s;
+        }
+        .pay-btn:active { background: #fada0a; transform: scale(0.98); }
 
-        /* 🚀 상시 노출 쿠팡 배너 스타일 */
         .fixed-banner { 
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); 
             width: 85%; max-width: 340px; z-index: 200; 
@@ -66,7 +71,6 @@
             padding: 12px; text-decoration: none; border: 2px solid #0073e9; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.2s;
         }
-        .coupang-link:active { transform: scale(0.97); }
         .cp-tag { color: #e52528; font-size: 0.75rem; font-weight: bold; margin-bottom: 3px; display: block; font-family: sans-serif; }
         .cp-desc { color: #000; font-size: 0.95rem; font-weight: bold; line-height: 1.3; font-family: sans-serif; }
         .cp-sub { font-size: 0.6rem; color: #666; text-align: center; margin-top: 8px; font-family: sans-serif; line-height: 1.2; }
@@ -99,7 +103,7 @@
         <div id="result-text" class="huge-warning">경고 :<br>좀비 출현!</div>
         <div class="bank-box">
             <p style="margin:0 0 10px; font-size:1rem; color:#fff;">좀비 하남자는 대리비를 입금하시오.</p>
-            <span class="copy-btn" onclick="copyAccount()">케이뱅크 100-210-317446</span>
+            <div class="pay-btn" onclick="openKakaoPay()">💛 카카오페이로 대리비 쏘기</div>
         </div>
     </div>
 
@@ -121,6 +125,11 @@
         let popup = document.getElementById('result-popup');
 
         let x = 0, y = 0, timeLeft = 10, isPlaying = false, gameInterval;
+
+        // 💛 카카오페이 송금 함수
+        function openKakaoPay() {
+            window.open("https://qr.kakaopay.com/FRK8J0SAD", "_blank");
+        }
 
         function startGame() {
             if (typeof DeviceOrientationEvent.requestPermission === 'function') {
@@ -180,12 +189,6 @@
                 bg.classList.add('active'); 
                 if (navigator.vibrate) navigator.vibrate([1000]); 
             }
-        }
-
-        function copyAccount() {
-            const acc = "케이뱅크 100-210-317446";
-            navigator.clipboard.writeText(acc);
-            alert("계좌번호 복사 완료! 형님, 입금 가즈아!\n\n" + acc);
         }
     </script>
 </body>
