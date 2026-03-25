@@ -125,9 +125,9 @@
                 timeLeft -= 0.1;
                 timerDisplay.innerText = timeLeft.toFixed(1) + "S";
                 
-                // 블랙홀(반지름 70px) - 구슬(반지름 40px) = 30px 제한
+                // 블랙홀(반지름 50px) - 구슬(반지름 40px) = 30px 제한
                 let dist = Math.sqrt(x*x + y*y);
-                if (dist > 30) { 
+                if (dist > 10) { 
                     endGame(false); 
                 }
 
